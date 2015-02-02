@@ -29,7 +29,7 @@ def fibonacci_transitions(state):
     """Fibonacci function as a function for a transition system.
 
     :type state: (int, int, int, int)
-    :rtype: (int, int, int, int)
+    :rtype: set[(int, int, int, int)]
     """
     a, b, i, n = state
     if i < n:
@@ -43,21 +43,31 @@ def fibonacci_transitions(state):
 # in a finite number of steps)
 
 
+class TransitionSystem:
+    @property
+    def init_states(self):
+        return set()
+
+    @staticmethod
+    def next(state):
+        return set()
+
+
 def invert(state):
     """Doesn't converge, but its reachable states collecting semantics does."""
     x, = state
     return -x,
 
 
-class InvertTransitions:
+class InvertTransitions(TransitionSystem):
     """Reachable states collecting semantics for invert(state)."""
 
     init_states = {(1,)}
 
-    @classmethod
-    def transition(cls, states):
-        new_states = {invert(state) for state in states}
-        return cls.init_states | new_states
+    @staticmethod
+    def next(state):
+        x, = state
+        return {(-x,)}
 
 
 # 3. Give an example of a transition system that doesn't converge and whose
@@ -70,15 +80,15 @@ def increment(state):
     return x + 1,
 
 
-class IncrementTransitions:
+class IncrementTransitions(TransitionSystem):
     """Reachable states collecting semantics for increment(state)."""
 
     init_states = {(0,)}
 
-    @classmethod
-    def transition(cls, states):
-        new_states = {increment(state) for state in states}
-        return cls.init_states | new_states
+    @staticmethod
+    def next(state):
+        x, = state
+        return {(x + 1,)}
 
 
 MAX_RECURSIONS = 100
@@ -103,6 +113,22 @@ def fixed_point(f):
     return g
 
 
+class ReachingStates:
+    def __init__(self, transition_system):
+        self.transition_system = transition_system
+
+    def transition(self, states):
+        """Transition function for collecting semantics.
+
+        :type states: set[T]
+        :rtype: set[T]
+        """
+        new_states = {new_state
+                      for state in states
+                      for new_state in self.transition_system.next(state)}
+        return self.transition_system.init_states | new_states
+
+
 class Test(unittest.TestCase):
     def test_converging_transition_system(self):
         # 1, 1, 2, 3, 5, 8
@@ -113,11 +139,11 @@ class Test(unittest.TestCase):
     def test_converging_reachable_states(self):
         self.assertRaises(FixedPointNotReached, fixed_point(invert), (1,))
 
-        f = fixed_point(InvertTransitions.transition)
+        f = fixed_point(ReachingStates(InvertTransitions).transition)
         self.assertEqual({(1,), (-1,)}, f(set()))
 
     def test_non_converging_reachable_states(self):
         self.assertRaises(FixedPointNotReached, fixed_point(increment), (0,))
 
-        f = fixed_point(IncrementTransitions.transition)
+        f = fixed_point(ReachingStates(IncrementTransitions).transition)
         self.assertRaises(FixedPointNotReached, f, set())
