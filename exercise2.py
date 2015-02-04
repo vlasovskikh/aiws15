@@ -10,7 +10,7 @@ Options:
     --help          Show help message
 
 """
-import abc
+
 
 from collections import namedtuple
 import unittest
