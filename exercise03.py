@@ -12,8 +12,8 @@ Options:
 import functools
 from docopt import docopt
 import sys
-from exercise02 import Top, Even, plus_1, minus_1, is_zero, non_zero, Bottom
 from funcutils import fixed_point
+from parity import Top, Even, Bottom, is_zero, non_zero, plus_1, minus_1
 from threecm import Inc, Dec, Zero, Stop, parse, Instruction
 
 
