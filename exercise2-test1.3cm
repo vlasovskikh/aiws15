@@ -1,5 +1,6 @@
-zero x 5 else 2
+zero x 6 else 2
 inc y
 dec x
 zero x 1 else 1
+inc z
 stop

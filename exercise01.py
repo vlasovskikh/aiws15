@@ -5,6 +5,7 @@ http://janmidtgaard.dk/aiws15/exercises1.pdf
 
 
 import unittest
+from util import FixedPointNotReached, fixed_point
 
 
 # 1. Give an example of a transition system that converges (i.e., reaches a
@@ -89,28 +90,6 @@ class IncrementTransitions(TransitionSystem):
     def next(state):
         x, = state
         return {(x + 1,)}
-
-
-MAX_RECURSIONS = 100
-
-
-class FixedPointNotReached(Exception):
-    pass
-
-
-def fixed_point(f):
-
-    def g(x):
-        for i in range(MAX_RECURSIONS):
-            y = f(x)
-            if y == x:
-                return y
-            else:
-                x = y
-
-        raise FixedPointNotReached(x)
-
-    return g
 
 
 class ReachingStates:

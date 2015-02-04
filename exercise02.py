@@ -1,12 +1,13 @@
 """Exercise 2. 3CountersMachine and Parity domain.
 
 Usage:
-    exercise2 [options] PATH
+    exercise02 [options] PATH
 
 
 Options:
     --input VALUE   Input value of x (non-negative) [default: 0]
     --trace         Trace machine execution
+    --analyze       Perform parity analysis
     --help          Show help message
 
 """
@@ -20,6 +21,8 @@ import sys
 
 from docopt import docopt
 import functools
+
+from util import fixed_point
 
 
 class Instruction:
@@ -185,7 +188,7 @@ class Top(Parity):
         return isinstance(other, Top)
 
     def join(self, other):
-        return other
+        return self
 
     def __repr__(self):
         return 'Top()'
@@ -197,10 +200,10 @@ class Odd(Parity):
         return isinstance(other, (Bottom, Odd))
 
     def join(self, other):
-        if isinstance(other, (Odd, Top)):
+        if isinstance(other, (Odd, Bottom)):
             return self
         else:
-            return Bottom()
+            return Top()
 
     def __repr__(self):
         return 'Odd()'
@@ -212,10 +215,10 @@ class Even(Parity):
         return isinstance(other, (Bottom, Even))
 
     def join(self, other):
-        if isinstance(other, (Even, Top)):
+        if isinstance(other, (Even, Bottom)):
             return self
         else:
-            return Bottom()
+            return Top()
 
     def __repr__(self):
         return 'Even()'
@@ -227,7 +230,7 @@ class Bottom(Parity):
         return True
 
     def join(self, other):
-        return self
+        return other
 
     def __repr__(self):
         return 'Bottom()'
@@ -246,6 +249,92 @@ def is_zero(p: Parity) -> Parity:
         raise TypeError('not a Parity element: {!r}'.format(p))
 
 
+def non_zero(p: Parity) -> Parity:
+    return p
+
+
+def plus_1(p: Parity) -> Parity:
+    if isinstance(p, Bottom):
+        return p
+    elif isinstance(p, Even):
+        return Odd()
+    elif isinstance(p, Odd):
+        return Even()
+    elif isinstance(p, Top):
+        return p
+    else:
+        raise TypeError('not a Parity element: {!r}'.format(p))
+
+
+minus_1 = plus_1
+
+
+def analyze_parity(program):
+    """Perform parity analysis.
+
+    :type program: list[Instruction]
+    :rtype: dict[int, (Parity, Parity, Parity)]
+    """
+
+    def instruction(pc):
+        return program[pc - 1]
+
+    def var_function(f, v, states):
+        x, y, z = states
+        if v == 'x':
+            return f(x), y, z
+        elif v == 'y':
+            return x, f(y), z
+        elif v == 'z':
+            return x, y, f(z)
+        else:
+            raise ValueError('unknown variable: {}'.format(v))
+
+    def f_hat(s_hat):
+        """
+
+        :type s_hat: dict[int, (Parity, Parity, Parity)]
+        :rtype: dict[int, (Parity, Parity, Parity)]
+        """
+
+        result = bottom_hat.copy()
+        result[1] = Top(), Even(), Even()
+
+        def map_and_join(index, f):
+            x, y, z = f(s_hat[pc])
+            rx, ry, rz = result[index]
+            return rx.join(x), ry.join(y), rz.join(z)
+
+        for pc, i in instructions.items():
+            if isinstance(i, Inc):
+                index = pc + 1
+                function = functools.partial(var_function, plus_1, i.v)
+                result[index] = map_and_join(index, function)
+            elif isinstance(i, Dec):
+                index = pc + 1
+                function = functools.partial(var_function, minus_1, i.v)
+                result[index] = map_and_join(index, function)
+            elif isinstance(i, Zero):
+                index1 = i.pc1
+                function1 = functools.partial(var_function, is_zero, i.v)
+                result[index1] = map_and_join(index1, function1)
+
+                index2 = i.pc2
+                function2 = functools.partial(var_function, non_zero, i.v)
+                result[index2] = map_and_join(index2, function2)
+            elif isinstance(i, Stop):
+                pass
+            else:
+                raise ValueError('unknown instruction: {}'.format(i))
+
+        return result
+
+    pcs = set(range(1, len(program) + 1))
+    instructions = {pc: instruction(pc) for pc in pcs}
+    bottom_hat = {pc: (Bottom(), Bottom(), Bottom()) for pc in pcs}
+    return fixed_point(f_hat)(bottom_hat)
+
+
 class ParityTest(unittest.TestCase):
     def test_le(self):
         self.assertLess(Bottom(), Even())
@@ -257,8 +346,13 @@ def main(argv):
     with open(opts['PATH'], 'r') as fd:
         data = fd.read()
     program = parse(data)
-    result = evaluate(program, int(opts['--input']), trace=opts['--trace'])
-    print('Result: {}'.format(result))
+    if opts['--analyze']:
+        result = analyze_parity(program)
+        for i, instruction in enumerate(program):
+            print('{} {}'.format(repr(instruction).ljust(30), result[i + 1]))
+    else:
+        result = evaluate(program, int(opts['--input']), trace=opts['--trace'])
+        print('Result: {}'.format(result))
 
 
 if __name__ == '__main__':
