@@ -175,10 +175,6 @@ class Parity:
     def join(self, other):
         pass
 
-    @property
-    def is_zero(self):
-        return Bottom()
-
     def __eq__(self, other):
         return type(self) == type(other)
 
@@ -190,10 +186,6 @@ class Top(Parity):
 
     def join(self, other):
         return other
-
-    @property
-    def is_zero(self):
-        return Even()
 
     def __repr__(self):
         return 'Top()'
@@ -210,10 +202,6 @@ class Odd(Parity):
         else:
             return Bottom()
 
-    @property
-    def is_zero(self):
-        return Bottom()
-
     def __repr__(self):
         return 'Odd()'
 
@@ -229,10 +217,6 @@ class Even(Parity):
         else:
             return Bottom()
 
-    @property
-    def is_zero(self):
-        return self
-
     def __repr__(self):
         return 'Even()'
 
@@ -245,12 +229,21 @@ class Bottom(Parity):
     def join(self, other):
         return self
 
-    @property
-    def is_zero(self):
-        return self
-
     def __repr__(self):
         return 'Bottom()'
+
+
+def is_zero(p: Parity) -> Parity:
+    if isinstance(p, Bottom):
+        return p
+    elif isinstance(p, Even):
+        return p
+    elif isinstance(p, Odd):
+        return Bottom()
+    elif isinstance(p, Top):
+        return Even()
+    else:
+        raise TypeError('not a Parity element: {!r}'.format(p))
 
 
 class ParityTest(unittest.TestCase):
