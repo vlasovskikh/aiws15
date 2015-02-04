@@ -5,7 +5,7 @@ http://janmidtgaard.dk/aiws15/exercises1.pdf
 
 
 import unittest
-from util import FixedPointNotReached, fixed_point
+from funcutils import FixedPointNotReached, fixed_point
 
 
 # 1. Give an example of a transition system that converges (i.e., reaches a

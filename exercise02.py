@@ -19,7 +19,7 @@ import functools
 from docopt import docopt
 
 from threecm import Inc, Dec, Zero, Stop, parse
-from util import fixed_point
+from funcutils import fixed_point
 
 
 def check_pc_out_of_bounds(program):
