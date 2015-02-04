@@ -33,9 +33,9 @@ def evaluate(program, input, trace=False):
     print('Running with input {}'.format(input))
     pc = 1
     x, y, z = input, 0, 0
-    if trace:
-        print('Trace: ({}, {}, {}, {})'.format(pc, x, y, z))
     while True:
+        if trace:
+            print('Trace: ({}, {}, {}, {})'.format(pc, x, y, z))
         if pc > len(program) or pc <= 0:
             return None
         i = program[pc - 1]
