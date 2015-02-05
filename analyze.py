@@ -1,12 +1,13 @@
-"""Exercise 3. Parity analysis for 3 Counter Machine
+"""Run an analysis for 3 Counter Machine
 
 Usage:
-    exercise03 [options] (parity|bounds) PATH
+    analyze [options] (parity|bounds) PATH
 
 
 Options:
     --help          Show help message
 """
+
 
 import functools
 import sys
@@ -24,7 +25,7 @@ def analyze(program, analysis):
 
     :type program: list[Instruction]
     :type analysis: Analysis
-    :rtype: dict[int, (Parity, Parity, Parity)]
+    :rtype: dict[int, (Lattice, Lattice, Lattice)]
     """
 
     def instruction(pc):
@@ -44,8 +45,8 @@ def analyze(program, analysis):
     def f_hat(s_hat):
         """
 
-        :type s_hat: dict[int, (Parity, Parity, Parity)]
-        :rtype: dict[int, (Parity, Parity, Parity)]
+        :type s_hat: dict[int, (Lattice, Lattice, Lattice)]
+        :rtype: dict[int, (Lattice, Lattice, Lattice)]
         """
 
         result = bottom_hat.copy()
