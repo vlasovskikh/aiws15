@@ -1,12 +1,13 @@
 """Exercise 3.1. Bounds analysis for 3 Counter Machine"""
 
 import functools
+from funcutils import Lattice
 
 from threecm import Analysis
 
 
 @functools.total_ordering
-class Bounds:
+class Bounds(Lattice):
     @property
     def bottom(self):
         return Bottom()

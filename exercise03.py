@@ -1,9 +1,10 @@
 import functools
+from funcutils import Lattice
 from threecm import Analysis
 
 
 @functools.total_ordering
-class Parity:
+class Parity(Lattice):
     @property
     def bottom(self):
         return Bottom()

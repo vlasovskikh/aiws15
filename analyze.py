@@ -15,7 +15,7 @@ import sys
 from docopt import docopt
 from bounds import BoundsAnalysis
 
-from funcutils import fixed_point
+from funcutils import fixed_point, Lattice
 from exercise03 import ParityAnalysis
 from threecm import Inc, Dec, Zero, Stop, parse, Instruction, Analysis
 

@@ -1,3 +1,6 @@
+from abc import abstractmethod, ABCMeta
+import functools
+
 MAX_RECURSIONS = 100
 
 
@@ -18,3 +21,22 @@ def fixed_point(f):
         raise FixedPointNotReached(x)
 
     return g
+
+
+@functools.total_ordering
+class Lattice(metaclass=ABCMeta):
+    @property
+    @abstractmethod
+    def bottom(self):
+        pass
+
+    @abstractmethod
+    def __le__(self, other):
+        pass
+
+    @abstractmethod
+    def join(self, other):
+        pass
+
+    def __eq__(self, other):
+        return type(self) == type(other)
