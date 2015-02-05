@@ -1,7 +1,7 @@
 from abc import abstractmethod, ABCMeta
 import functools
 
-MAX_RECURSIONS = 100
+MAX_RECURSIONS = 1000
 
 
 class FixedPointNotReached(Exception):
@@ -40,3 +40,6 @@ class Lattice(metaclass=ABCMeta):
 
     def __eq__(self, other):
         return type(self) == type(other)
+
+    def widen(self, other):
+        return self

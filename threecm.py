@@ -108,5 +108,5 @@ class Analysis:
         pass
 
     @staticmethod
-    def widen(x):
-        return x
+    def widen(previous, next):
+        return next

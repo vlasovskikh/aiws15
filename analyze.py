@@ -1,7 +1,7 @@
 """Run an analysis for 3 Counter Machine
 
 Usage:
-    analyze [options] (parity|bounds) PATH
+    analyze [options] (parity|bounds|interval) PATH
 
 
 Options:
@@ -14,6 +14,7 @@ import sys
 
 from docopt import docopt
 from bounds import BoundsAnalysis
+from exercise04 import IntervalAnalysis
 
 from funcutils import fixed_point, Lattice
 from exercise03 import ParityAnalysis
@@ -88,7 +89,12 @@ def analyze(program, analysis):
     instructions = {pc: instruction(pc) for pc in pcs}
     bottom_hat = {pc: (analysis.bottom, analysis.bottom, analysis.bottom)
                   for pc in pcs}
-    return fixed_point(f_hat)(bottom_hat)
+
+    def f_hat_with_widening(s_hat):
+        new_s_hat = f_hat(s_hat)
+        return analysis.widen(s_hat, new_s_hat)
+
+    return fixed_point(f_hat_with_widening)(bottom_hat)
 
 
 def main(argv):
@@ -100,6 +106,8 @@ def main(argv):
         analysis = ParityAnalysis()
     elif opts['bounds']:
         analysis = BoundsAnalysis()
+    elif opts['interval']:
+        analysis = IntervalAnalysis()
     else:
         raise ValueError('specify an analysis to run')
     result = analyze(program, analysis)
