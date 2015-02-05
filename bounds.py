@@ -1,19 +1,8 @@
-"""Exercise 3.1. Bounds analysis for 3 Counter Machine
-
-Usage:
-    bounds [options] PATH
-
-
-Options:
-    --help          Show help message
-"""
-
+"""Exercise 3.1. Bounds analysis for 3 Counter Machine"""
 
 import functools
-from docopt import docopt
-import sys
-from funcutils import fixed_point
-from threecm import Inc, Dec, Zero, Stop, parse, Instruction
+
+from threecm import Analysis
 
 
 @functools.total_ordering
@@ -101,141 +90,66 @@ class Regular(Bounds):
         return 'Regular()'
 
 
-def plus_1(x):
-    if isinstance(x, Bottom):
-        return x
-    elif isinstance(x, ZeroBound):
-        return OneBound()
-    elif isinstance(x, OneBound):
-        return Regular()
-    elif isinstance(x, Regular):
-        return Regular()
-    elif isinstance(x, Top):
-        return x
-    else:
-        raise TypeError('not a Bounds element: {!r}'.format(x))
+class BoundsAnalysis(Analysis):
+    bottom = Bottom()
+    initial = Top(), ZeroBound(), ZeroBound()
 
-
-def minus_1(x):
-    if isinstance(x, Bottom):
-        return x
-    elif isinstance(x, ZeroBound):
-        return Bottom()
-    elif isinstance(x, OneBound):
-        return ZeroBound()
-    elif isinstance(x, Regular):
-        return Top()
-    elif isinstance(x, Top):
-        return x
-    else:
-        raise TypeError('not a Bounds element: {!r}'.format(x))
-
-
-def is_zero(x):
-    if isinstance(x, Bottom):
-        return x
-    elif isinstance(x, ZeroBound):
-        return x
-    elif isinstance(x, OneBound):
-        return Bottom()
-    elif isinstance(x, Regular):
-        return Bottom()
-    elif isinstance(x, Top):
-        return ZeroBound()
-    else:
-        raise TypeError('not a Bounds element: {!r}'.format(x))
-
-
-def non_zero(x):
-    if isinstance(x, Bottom):
-        return x
-    elif isinstance(x, ZeroBound):
-        return Bottom()
-    elif isinstance(x, OneBound):
-        return x
-    elif isinstance(x, Regular):
-        return x
-    elif isinstance(x, Top):
-        return x
-    else:
-        raise TypeError('not a Bounds element: {!r}'.format(x))
-
-
-def analyze_bounds(program):
-    """Perform bounds analysis.
-
-    :type program: list[Instruction]
-    :rtype: dict[int, (Bounds, Bounds, Bounds)]
-    """
-
-    def instruction(pc):
-        return program[pc - 1]
-
-    def var_function(f, v, states):
-        x, y, z = states
-        if v == 'x':
-            return f(x), y, z
-        elif v == 'y':
-            return x, f(y), z
-        elif v == 'z':
-            return x, y, f(z)
+    @staticmethod
+    def plus_1(x):
+        if isinstance(x, Bottom):
+            return x
+        elif isinstance(x, ZeroBound):
+            return OneBound()
+        elif isinstance(x, OneBound):
+            return Regular()
+        elif isinstance(x, Regular):
+            return Regular()
+        elif isinstance(x, Top):
+            return x
         else:
-            raise ValueError('unknown variable: {}'.format(v))
+            raise TypeError('not a Bounds element: {!r}'.format(x))
 
-    def f_hat(s_hat):
-        """
+    @staticmethod
+    def minus_1(x):
+        if isinstance(x, Bottom):
+            return x
+        elif isinstance(x, ZeroBound):
+            return Bottom()
+        elif isinstance(x, OneBound):
+            return ZeroBound()
+        elif isinstance(x, Regular):
+            return Top()
+        elif isinstance(x, Top):
+            return x
+        else:
+            raise TypeError('not a Bounds element: {!r}'.format(x))
 
-        :type s_hat: dict[int, (Bounds, Bounds, Bounds)]
-        :rtype: dict[int, (Bounds, Bounds, Bounds)]
-        """
+    @staticmethod
+    def is_zero(x):
+        if isinstance(x, Bottom):
+            return x
+        elif isinstance(x, ZeroBound):
+            return x
+        elif isinstance(x, OneBound):
+            return Bottom()
+        elif isinstance(x, Regular):
+            return Bottom()
+        elif isinstance(x, Top):
+            return ZeroBound()
+        else:
+            raise TypeError('not a Bounds element: {!r}'.format(x))
 
-        result = bottom_hat.copy()
-        result[1] = Top(), ZeroBound(), ZeroBound()
-
-        def map_and_join(index, f):
-            x, y, z = f(s_hat[pc])
-            rx, ry, rz = result[index]
-            return rx.join(x), ry.join(y), rz.join(z)
-
-        for pc, i in instructions.items():
-            if isinstance(i, Inc):
-                index = pc + 1
-                function = functools.partial(var_function, plus_1, i.v)
-                result[index] = map_and_join(index, function)
-            elif isinstance(i, Dec):
-                index = pc + 1
-                function = functools.partial(var_function, minus_1, i.v)
-                result[index] = map_and_join(index, function)
-            elif isinstance(i, Zero):
-                index1 = i.pc1
-                function1 = functools.partial(var_function, is_zero, i.v)
-                result[index1] = map_and_join(index1, function1)
-
-                index2 = i.pc2
-                function2 = functools.partial(var_function, non_zero, i.v)
-                result[index2] = map_and_join(index2, function2)
-            elif isinstance(i, Stop):
-                pass
-            else:
-                raise ValueError('unknown instruction: {}'.format(i))
-
-        return result
-
-    pcs = set(range(1, len(program) + 1))
-    instructions = {pc: instruction(pc) for pc in pcs}
-    bottom_hat = {pc: (Bottom(), Bottom(), Bottom()) for pc in pcs}
-    return fixed_point(f_hat)(bottom_hat)
-
-
-def main(argv):
-    opts = docopt(__doc__, argv=argv)
-    with open(opts['PATH'], 'r') as fd:
-        data = fd.read()
-    program = parse(data)
-    result = analyze_bounds(program)
-    for i, instruction in enumerate(program):
-        print('{} {}'.format(repr(instruction).ljust(30), result[i + 1]))
-
-
-if __name__ == '__main__':
-    main(sys.argv[1:])
+    @staticmethod
+    def non_zero(x):
+        if isinstance(x, Bottom):
+            return x
+        elif isinstance(x, ZeroBound):
+            return Bottom()
+        elif isinstance(x, OneBound):
+            return x
+        elif isinstance(x, Regular):
+            return x
+        elif isinstance(x, Top):
+            return x
+        else:
+            raise TypeError('not a Bounds element: {!r}'.format(x))

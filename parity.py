@@ -1,4 +1,5 @@
 import functools
+from threecm import Analysis
 
 
 @functools.total_ordering
@@ -71,36 +72,38 @@ class Bottom(Parity):
         return 'Bottom()'
 
 
-def is_zero(p: Parity) -> Parity:
-    if isinstance(p, Bottom):
+class ParityAnalysis(Analysis):
+    bottom = Bottom()
+    initial = Top(), Even(), Even()
+
+    @staticmethod
+    def non_zero(p: Parity) -> Parity:
         return p
-    elif isinstance(p, Even):
-        return p
-    elif isinstance(p, Odd):
-        return Bottom()
-    elif isinstance(p, Top):
-        return Even()
-    else:
-        raise TypeError('not a Parity element: {!r}'.format(p))
 
+    @staticmethod
+    def is_zero(p: Parity) -> Parity:
+        if isinstance(p, Bottom):
+            return p
+        elif isinstance(p, Even):
+            return p
+        elif isinstance(p, Odd):
+            return Bottom()
+        elif isinstance(p, Top):
+            return Even()
+        else:
+            raise TypeError('not a Parity element: {!r}'.format(p))
 
-def non_zero(p: Parity) -> Parity:
-    return p
+    @staticmethod
+    def plus_1(p: Parity) -> Parity:
+        if isinstance(p, Bottom):
+            return p
+        elif isinstance(p, Even):
+            return Odd()
+        elif isinstance(p, Odd):
+            return Even()
+        elif isinstance(p, Top):
+            return p
+        else:
+            raise TypeError('not a Parity element: {!r}'.format(p))
 
-
-def plus_1(p: Parity) -> Parity:
-    if isinstance(p, Bottom):
-        return p
-    elif isinstance(p, Even):
-        return Odd()
-    elif isinstance(p, Odd):
-        return Even()
-    elif isinstance(p, Top):
-        return p
-    else:
-        raise TypeError('not a Parity element: {!r}'.format(p))
-
-
-minus_1 = plus_1
-
-
+    minus_1 = plus_1

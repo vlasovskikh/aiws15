@@ -85,3 +85,28 @@ class ParseTest(unittest.TestCase):
                          parse('dec y\n'
                                'zero y 1 else 3\n'
                                'stop\n'))
+
+
+class Analysis:
+    bottom = None
+    initial = None
+
+    @staticmethod
+    def plus_1(x):
+        pass
+
+    @staticmethod
+    def minus_1(x):
+        pass
+
+    @staticmethod
+    def is_zero(x):
+        pass
+
+    @staticmethod
+    def non_zero(x):
+        pass
+
+    @staticmethod
+    def widen(x):
+        return x
