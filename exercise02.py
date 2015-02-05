@@ -14,7 +14,7 @@ import unittest
 import sys
 
 from docopt import docopt
-from parity import Top, Odd, Even, Bottom
+from exercise03 import Top, Odd, Even, Bottom
 from threecm import Inc, Dec, Zero, Stop, parse
 
 
